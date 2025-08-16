@@ -3,90 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CAI Project Progress Dashboard</title>
+    <title>A1 Project Progress Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            background: #111216;
+            color: #e2e8f0;
         }
         .ai-output {
             margin-top: 20px;
             padding: 15px;
-            background-color: #0d0d0d;
+            background-color: #16181d;
             border-left: 4px solid #64ffda;
             white-space: pre-wrap;
             font-family: monospace;
         }
+        .secret-hacker {
+            background: linear-gradient(120deg, #101f1f 0%, #0e1a2d 100%);
+            color: #00ffc8 !important;
+            border: 2px solid #00ffc8;
+            box-shadow: 0 0 30px #00ffc8a0;
+            transition: all 0.3s;
+        }
+        .hacker-header {
+            background: linear-gradient(90deg, #00ffc8 0%, #1a48ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .konami-banner {
+            display: none;
+            background: #0e1a2d;
+            color: #00ffc8;
+            border: 2px solid #00ffc8;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            padding: 16px;
+            text-align: center;
+            font-family: monospace;
+            font-size: 1rem;
+            letter-spacing: 1px;
+        }
+        .konami-banner.active {
+            display: block;
+            animation: hackerGlow 1.2s infinite alternate;
+        }
+        @keyframes hackerGlow {
+            0% { box-shadow: 0 0 8px #00ffc8a0; }
+            100% { box-shadow: 0 0 32px #1a48ffaa; }
+        }
+        /* Dark mode tweaks for dashboard cards */
+        .dashboard-card {
+            background: #181b23;
+            border: 1px solid #23273a;
+        }
+        .dashboard-card .text-gray-400 {
+            color: #9ca3af !important;
+        }
+        .dashboard-card .text-gray-500 {
+            color: #64748b !important;
+        }
+        .dashboard-card label {
+            color: #e2e8f0 !important;
+        }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen p-4 sm:p-8">
+<body class="bg-[#111216] text-[#e2e8f0] min-h-screen p-4 sm:p-8">
 
+    <!-- KONAMI EASTER EGG BANNER -->
+    <div id="konami-banner" class="konami-banner">
+        <b>💀 ELITE HACKER MODE ACTIVATED 💀</b><br>
+        Welcome to the underground, chief.<br>
+        The dashboard is now in <span style="color:#00ffc8;">Hacker Mode</span>.<br>
+        (Konami Code: ↑ ↑ ↓ ↓ ← → ← → B A)
+    </div>
+                <!-- AI Output Section -->
+        <div id="ai-output" class="ai-output hidden"></div>
     <!-- Main Container -->
-    <div class="max-w-4xl mx-auto bg-gray-800 p-6 sm:p-8 rounded-xl shadow-lg border border-gray-700">
-        
+    <div class="max-w-4xl mx-auto bg-[#16181d] p-6 sm:p-8 rounded-xl shadow-lg border border-[#23273a]">
+
         <!-- Header -->
-        <h1 class="text-3xl sm:text-4xl font-bold text-center mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
-            Repo Master Plan
+        <h1 class="text-3xl sm:text-4xl font-bold text-center mb-2 hacker-header">
+            A1-CAI Master Plan
         </h1>
-        <p class="text-center text-gray-400 mb-8 text-sm sm:text-base">Repository: frostyfucker/mp | Branch: main</p>
+        <p class="text-center text-[#64748b] mb-8 text-sm sm:text-base">Repository: frostyfucker/mp | Branch: main | Config: <code>a1.yml</code></p>
 
         <!-- Progress Section -->
         <div class="mb-10">
-            <h2 class="text-xl sm:text-2xl font-semibold mb-4 text-emerald-400">Project Progress</h2>
-            <div class="w-full bg-gray-700 rounded-full h-8 overflow-hidden relative">
-                <div id="progressBar" class="bg-gradient-to-r from-cyan-500 to-blue-500 h-full rounded-full transition-all duration-700 ease-out" style="width: 0%;"></div>
-                <div id="progressText" class="absolute inset-0 flex items-center justify-center font-bold text-gray-900 text-sm"></div>
+            <h2 class="text-xl sm:text-2xl font-semibold mb-4" style="color:#00ffc8;">Project Progress</h2>
+            <div class="w-full bg-[#23273a] rounded-full h-8 overflow-hidden relative">
+                <div id="progressBar" class="bg-gradient-to-r from-[#00ffc8] to-[#1a48ff] h-full rounded-full transition-all duration-700 ease-out" style="width: 0%;"></div>
+                <div id="progressText" class="absolute inset-0 flex items-center justify-center font-bold text-[#16181d] text-sm"></div>
             </div>
         </div>
 
         <!-- Milestones Section -->
         <div id="milestones">
-            <h2 class="text-xl sm:text-2xl font-semibold mb-6 text-emerald-400">Milestones & Tools</h2>
+            <h2 class="text-xl sm:text-2xl font-semibold mb-6" style="color:#00ffc8;">Milestones & Tools</h2>
         </div>
-
-        <!-- AI Output Section -->
-        <div id="ai-output" class="ai-output hidden"></div>
-
     </div>
 
     <script>
-        // Use a function to contain the logic, ensuring everything is loaded properly.
+        // --- KONAMI CODE EASTER EGG ---
+        (function(){
+            const secret = [38,38,40,40,37,39,37,39,66,65]; // up,up,down,down,left,right,left,right,B,A
+            let input = [];
+            const body = document.body;
+            const banner = document.getElementById('konami-banner');
+            window.addEventListener('keydown', function(e) {
+                input.push(e.keyCode);
+                if (input.length > secret.length) input.shift();
+                if (input.toString() === secret.toString()) {
+                    body.classList.toggle('secret-hacker');
+                    banner.classList.toggle('active');
+                    if (banner.classList.contains('active')) {
+                        banner.innerHTML = `<b>💀 ELITE HACKER MODE ACTIVATED 💀</b><br>
+                            Welcome to the underground, chief.<br>
+                            The dashboard is now in <span style="color:#00ffc8;">Hacker Mode</span>.<br>
+                            (Konami Code: ↑ ↑ ↓ ↓ ← → ← → B A)`;
+                    } else {
+                        banner.innerHTML = '';
+                    }
+                }
+            });
+        })();
+
+        // MAIN DASHBOARD LOGIC (loads from a1.yml)
         window.onload = function() {
-            // URL to fetch data from your GitHub repository.
-            const githubYamlUrl = 'https://raw.githubusercontent.com/frostyfucker/mp/refs/heads/main/a1.yml';
+            const githubYamlUrl = 'https://raw.githubusercontent.com/frostyfucker/mp/main/a1.yml';
             const aiOutputDiv = document.getElementById('ai-output');
 
-            // Function to fetch YAML data from GitHub and render the dashboard.
             async function fetchAndRenderDashboard() {
                 try {
-                    // Fetch the YAML data from the GitHub URL.
                     const response = await fetch(githubYamlUrl);
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
                     const yamlContent = await response.text();
-                    
-                    // Use js-yaml.loadAll to parse the YAML string into an array of JavaScript objects.
                     const data = jsyaml.loadAll(yamlContent);
 
-                    // Grab the main dashboard elements
                     const progressBar = document.getElementById('progressBar');
                     const progressText = document.getElementById('progressText');
                     const milestonesContainer = document.getElementById('milestones');
-                    
-                    // Clear previous content before re-rendering
-                    milestonesContainer.innerHTML = `<h2 class="text-xl sm:text-2xl font-semibold mb-6 text-emerald-400">Milestones & Tools</h2>`;
+                    milestonesContainer.innerHTML = `<h2 class="text-xl sm:text-2xl font-semibold mb-6" style="color:#00ffc8;">Milestones & Tools</h2>`;
 
-
-                    // Calculate total and "in development" tools
                     let totalTools = 0;
                     let toolsCompleted = 0;
                     let toolsInProgress = 0;
                     let phases = {};
 
-                    // Iterate through the raw YAML data to find all tools and their statuses.
                     data.forEach(document => {
                         if (document && document.tools && document.phase) {
                             document.tools.forEach(tool => {
@@ -98,56 +166,51 @@
                                     toolsCompleted++;
                                 }
                             });
-                            // Store phases to render them later.
                             phases[document.phase] = document.tools;
                         }
                     });
-                    
-                    // Calculate and update the progress bar
+
                     const progressPercentage = totalTools > 0 ? Math.round(((toolsCompleted) / totalTools) * 100) : 0;
                     progressBar.style.width = `${progressPercentage}%`;
                     progressText.textContent = `${toolsCompleted} of ${totalTools} Tools Completed (${progressPercentage}%)`;
 
-                    // Render the phases and tools
                     for (const phase in phases) {
                         const phaseSection = document.createElement('div');
                         phaseSection.className = 'mb-8';
 
                         const phaseTitle = document.createElement('h3');
-                        phaseTitle.className = 'text-lg sm:text-xl font-bold mb-4 text-white border-b-2 border-gray-600 pb-2';
+                        phaseTitle.className = 'text-lg sm:text-xl font-bold mb-4 text-[#e2e8f0] border-b-2 border-[#23273a] pb-2';
                         phaseTitle.textContent = phase;
                         phaseSection.appendChild(phaseTitle);
 
                         phases[phase].forEach(tool => {
-                            // Create card for each tool
                             const toolCard = document.createElement('div');
                             let statusColor = '';
                             let statusIcon = '';
 
-                            // Set colors and icons based on status.
                             if (tool.status === 'In Development') {
-                                statusColor = 'bg-blue-600';
+                                statusColor = 'bg-[#1a48ff] text-[#e2e8f0]';
                                 statusIcon = '🛠️';
                             } else if (tool.status === 'In Testing') {
-                                statusColor = 'bg-yellow-600';
+                                statusColor = 'bg-yellow-600 text-[#16181d]';
                                 statusIcon = '🧪';
                             } else if (tool.status === 'Complete') {
-                                statusColor = 'bg-green-600';
+                                statusColor = 'bg-[#00ffc8] text-[#16181d]';
                                 statusIcon = '✅';
                             } else if (tool.status === 'On Hold') {
-                                statusColor = 'bg-red-600';
+                                statusColor = 'bg-red-600 text-[#e2e8f0]';
                                 statusIcon = '⏸️';
                             } else {
-                                statusColor = 'bg-gray-600';
+                                statusColor = 'bg-[#23273a] text-[#e2e8f0]';
                                 statusIcon = '📝';
                             }
 
-                            toolCard.className = `bg-gray-700 p-4 rounded-lg mb-4 shadow-md flex items-start gap-4`;
+                            toolCard.className = `dashboard-card p-4 rounded-lg mb-4 shadow-md flex items-start gap-4`;
                             toolCard.innerHTML = `
-                                <input type="checkbox" id="${tool.id}" class="h-6 w-6 rounded-md bg-gray-600 border border-gray-500 appearance-none checked:bg-green-500 checked:border-transparent cursor-pointer relative top-1 transition-colors duration-200 ease-in-out" data-tool-name="${tool.name}" data-tool-description="${tool.description}">
+                                <input type="checkbox" id="${tool.id}" class="h-6 w-6 rounded-md bg-[#23273a] border border-[#374151] appearance-none checked:bg-[#00ffc8] checked:border-transparent cursor-pointer" data-tool-name="${tool.name}" data-tool-description="${tool.description}">
                                 <div class="flex-1">
                                     <div class="flex items-center justify-between mb-2">
-                                        <label for="${tool.id}" class="text-lg font-semibold text-gray-100 cursor-pointer">${tool.name}</label>
+                                        <label for="${tool.id}" class="text-lg font-semibold cursor-pointer">${tool.name}</label>
                                         <span class="text-xs font-semibold px-2 py-1 rounded-full ${statusColor}">${statusIcon} ${tool.status}</span>
                                     </div>
                                     <p class="text-sm text-gray-400 mb-2">${tool.description}</p>
@@ -159,7 +222,7 @@
 
                         milestonesContainer.appendChild(phaseSection);
                     }
-                    
+
                     const checkboxes = document.querySelectorAll('input[type="checkbox"]');
                     checkboxes.forEach(checkbox => {
                         checkbox.addEventListener('change', (event) => {
@@ -175,7 +238,6 @@
                     });
 
                 } catch (error) {
-                    // Display an error message with details if the YAML parsing or fetching fails.
                     document.getElementById('milestones').innerHTML = `<p class="text-red-500">Error parsing project data. <br><br><b>Error:</b> ${error.message}</p>`;
                     console.error("Fetching/Parsing Error:", error);
                 }
@@ -184,14 +246,10 @@
             async function generateAIContent(toolName, toolDescription) {
                 aiOutputDiv.classList.remove('hidden');
                 aiOutputDiv.textContent = `Generating a plan for: ${toolName}...`;
-                
-                let chatHistory = [];
-                const prompt = `Provide a brief, actionable next step for the project task: "${toolName}". The description of the task is "${toolDescription}". Focus on a very specific, technical action a developer should take. Be direct and concise.`;
-                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
 
-                const payload = {
-                    contents: chatHistory
-                };
+                let chatHistory = [];
+                const prompt = `Provide a brief, actionable next step for the project task: "${toolName}". The description of the task is "${toolDescription}". Focus on a very specific, technical action.`;
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
 
                 const apiKey = "";
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
@@ -203,7 +261,7 @@
                         body: JSON.stringify(payload)
                     });
                     const result = await response.json();
-                    
+
                     if (result.candidates && result.candidates.length > 0 &&
                         result.candidates[0].content && result.candidates[0].content.parts &&
                         result.candidates[0].content.parts.length > 0) {
@@ -218,7 +276,6 @@
                 }
             }
 
-            // Call the function to render the dashboard
             fetchAndRenderDashboard();
         };
     </script>
